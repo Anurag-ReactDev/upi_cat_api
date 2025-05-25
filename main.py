@@ -1,6 +1,7 @@
 # backend_app.py
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import os
@@ -19,7 +20,18 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 PDF_PASSWORD = "9550521991"  # Update if needed
 MODEL_API_URL = "https://model-cloud-api.onrender.com/predict"  # Replace with actual URL
 
+
+
 app = FastAPI()
+
+# === CORS (to allow frontend access) ===
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def authenticate_gmail():
     creds = None
