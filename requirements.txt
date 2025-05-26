@@ -1,2 +1,11 @@
-pdfplumber
 fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+requests
+pandas
+python-dotenv
+PyMuPDF
+google-api-python-client
+google-auth
+google-auth-oauthlib
