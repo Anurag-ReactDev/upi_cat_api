@@ -4,3 +4,4 @@
 \processed
 .env
 *.json
+*base64*.txt
