@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from typing import List
 import os
 import re
-import base64
+from dotenv import load_dotenv
+import base64,json
 import pandas as pd
 import tempfile
 import requests
@@ -21,7 +22,7 @@ PDF_PASSWORD = "9550521991"  # Update if needed
 MODEL_API_URL = "https://model-cloud-api.onrender.com/predict"  # Replace with actual URL
 
 
-
+load_dotenv()
 app = FastAPI()
 
 # === CORS (to allow frontend access) ===
@@ -33,16 +34,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_credentials_dict():
+    b64_creds = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+    if not b64_creds:
+        raise Exception("GOOGLE_CREDENTIALS_BASE64 is not set")
+    return json.loads(base64.b64decode(b64_creds))
+
+
+def get_token_dict():
+    b64_token = os.getenv("GOOGLE_TOKEN_BASE64")
+    if not b64_token:
+        raise Exception("GOOGLE_TOKEN_BASE64 is not set")
+    return json.loads(base64.b64decode(b64_token))
+
+
 def authenticate_gmail():
     creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    try:
+        token_info = get_token_dict()
+        creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+    except Exception as e:
+        raise Exception("🔒 Failed to load credentials from env: " + str(e))
+
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            raise Exception("No valid Gmail credentials. Please run gmail_auth.py first.")
+            raise Exception("❌ Token expired or invalid — re-auth required")
+
     return build("gmail", "v1", credentials=creds)
+
 
 
 
