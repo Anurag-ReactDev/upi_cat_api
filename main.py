@@ -95,7 +95,8 @@ def extract_transactions():
         service = authenticate_gmail()
         query = 'label:transaction-statements has:attachment filename:pdf'
         results = service.users().messages().list(userId='me', q=query).execute()
-        messages = results.get('messages', [])[::-1]
+        # messages = results.get('messages', [])[::-1]
+        messages = results.get('messages', [])
 
         os.makedirs("downloads", exist_ok=True)
         os.makedirs("processed", exist_ok=True)
